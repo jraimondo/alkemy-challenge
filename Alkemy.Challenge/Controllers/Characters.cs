@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using System.Net.Http.Headers;
+using System.Text;
+using Alkemy.Challenge.Services;
 
 namespace Alkemy.Challenge.Controllers
 {
@@ -40,6 +43,14 @@ namespace Alkemy.Challenge.Controllers
         [Route("/characters")]
         public ActionResult<IEnumerable<IPersonaje>> get([FromQuery] string name, [FromQuery] int age, [FromQuery] int movies)
         {
+
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token,db))
+                   return Unauthorized();
+           
+
             bool filter = false;
 
             List<Personaje> busquedaPersonajes = db.Personajes.Include(p => p.PeliculasSeries).ToList();
@@ -81,6 +92,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpPost]
         public ActionResult<Personaje> post(Personaje personaje)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             if (ModelState.IsValid)
             {
                 db.Personajes.Add(personaje);
@@ -96,6 +113,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpPut]
         public ActionResult<Personaje> put(Personaje personaje)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             Personaje nuevoPersonaje = new Personaje()
             {
                 Id = personaje.Id,
@@ -119,6 +142,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpDelete]
         public ActionResult delete(Personaje personaje)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             Personaje BorrarPersonaje = db.Personajes.FirstOrDefault(p => p.Id == personaje.Id);
 
             if (BorrarPersonaje != null)

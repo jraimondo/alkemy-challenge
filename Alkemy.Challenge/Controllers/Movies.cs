@@ -1,10 +1,12 @@
 ﻿using Alkemy.Challenge.Data;
 using Alkemy.Challenge.Models;
+using Alkemy.Challenge.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 
 namespace Alkemy.Challenge.Controllers
 {
@@ -23,6 +25,11 @@ namespace Alkemy.Challenge.Controllers
         [Route("detalle/{id}")]
         public ActionResult<PeliculaSerie> detalle(int id)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
 
             PeliculaSerie peliculaSerie = db.PeliculasSeries.Where(p => p.Id == id).Include(p => p.Personajes).FirstOrDefault();
 
@@ -33,6 +40,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<PeliculaSerie>> get([FromQuery] string name, [FromQuery] int genre, [FromQuery] string order)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             bool filter = false;
             List<PeliculaSerie> busquedaPeliculas = db.PeliculasSeries.ToList();
 
@@ -78,6 +91,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpPost]
         public ActionResult<PeliculaSerie> post(PeliculaSerie peliculaSerie)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             if (ModelState.IsValid)
             {
                 db.PeliculasSeries.Add(peliculaSerie);
@@ -93,6 +112,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpPut]
         public ActionResult<PeliculaSerie> put(PeliculaSerie peliculaSerie)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             PeliculaSerie nuevaPelicula = new PeliculaSerie()
             {
                 Id = peliculaSerie.Id,
@@ -115,6 +140,12 @@ namespace Alkemy.Challenge.Controllers
         [HttpDelete]
         public ActionResult delete(PeliculaSerie peliculaSerie)
         {
+            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var token = authHeader.Parameter;
+
+            if (!ValidarUsuario.TokenIsValid(token, db))
+                return Unauthorized();
+
             PeliculaSerie borrarPelicula = db.PeliculasSeries.FirstOrDefault(p => p.Id == peliculaSerie.Id);
 
             if (borrarPelicula != null)
